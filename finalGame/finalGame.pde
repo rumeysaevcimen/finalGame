@@ -1,4 +1,5 @@
-PImage wall, character1, character2, character3;
+PImage wall, wall1_1, wall2_1, wall2_2;
+PImage character1, character2, character3;
 int selectedCharacter = 0;
 boolean characterSelected = false;
 boolean gameStarted = false;
@@ -6,6 +7,11 @@ boolean gameStarted = false;
 void setup() {
   size(1000, 550);
   wall = loadImage("wall0.png");
+  
+  // Yeni duvar resimlerini yükleyin
+  wall1_1 = loadImage("wall1.1.png");
+  wall2_1 = loadImage("wall2.1.png");
+  wall2_2 = loadImage("wall2.2.png");
 
   // Karakter resimlerini yükleyin
   character1 = loadImage("character1.png");
@@ -46,18 +52,14 @@ void displayCharacterSelection() {
 }
 
 void displayGameScene() {
-  image(wall, 0, 0, width, height); // Arka plan duvarı tekrar çiz
   if (selectedCharacter == 1) {
-    fill(255, 0, 0); // Kırmızı arka plan
-    rect(0, 0, width, height);
+    image(wall1_1, 0, 0, width, height); // Duvar resmi wall1_1 tam ekran
     image(character1, 50, height/2 - character1.height/2); // Seçilen karakteri sol tarafta göster
   } else if (selectedCharacter == 2) {
-    fill(0, 255, 0); // Yeşil arka plan
-    rect(0, 0, width, height);
+    image(wall2_1, 0, 0, width, height); // Duvar resmi wall2_1 tam ekran
     image(character2, 50, height/2 - character2.height/2); // Seçilen karakteri sol tarafta göster
   } else if (selectedCharacter == 3) {
-    fill(0, 0, 255); // Mavi arka plan
-    rect(0, 0, width, height);
+    image(wall2_2, 0, 0, width, height); // Duvar resmi wall2_2 tam ekran
     image(character3, 50, height/2 - character3.height/2); // Seçilen karakteri sol tarafta göster
   }
 }
