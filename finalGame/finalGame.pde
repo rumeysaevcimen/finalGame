@@ -1,5 +1,7 @@
-PImage wall, wall1_1, wall2_1, wall2_2;
+PImage wall, wall1_1, wall2_1, wall3_1;
 PImage character1, character2, character3;
+PImage[][] backgrounds;
+int currentScene = 0;
 int selectedCharacter = 0;
 boolean characterSelected = false;
 boolean gameStarted = false;
@@ -18,59 +20,46 @@ boolean upPressed = false;
 
 int coinsCollected = 0;
 
-ArrayList<Platform> platforms;
 ArrayList<Coin> coins;
 
 void setup() {
   size(1000, 550);
   wall = loadImage("wall0.png");
-  
-  // Yeni duvar resimlerini yükleyin
-  wall1_1 = loadImage("wall1.1.png");
-  wall2_1 = loadImage("wall2.1.png");
-  wall2_2 = loadImage("wall2.2.png");
 
-  // Karakter resimlerini yükleyin
-  character1 = loadImage("character1.png");
+  wall1_1 = loadImage("wall1.1.png");
+  PImage wall1_2 = loadImage("wall1.2.png");
+  PImage wall1_3 = loadImage("wall1.3.png");
+
+  wall2_1 = loadImage("wall2.1.png");
+  PImage wall2_2 = loadImage("wall2.2.png");
+  PImage wall2_3 = loadImage("wall2.3.png");
+
+  wall3_1 = loadImage("wall3.1.png");
+  PImage wall3_2 = loadImage("wall3.2.png");
+  PImage wall3_3 = loadImage("wall3.3.png");
+
+  backgrounds = new PImage[][]{
+    {wall1_1, wall1_2, wall1_3},
+    {wall2_1, wall2_2, wall2_3},
+    {wall3_1, wall3_2, wall3_3}
+  };
+
+  character1 = loadImage("c1move.png");
   character2 = loadImage("character2.png");
   character3 = loadImage("character3.png");
 
-  // Karakter resimlerinin boyutlarını ayarlayın
   character1.resize(200, 200);
   character2.resize(200, 200);
   character3.resize(130, 130);
-  
-  // Başlangıç karakter yüksekliği
   characterY = height / 2;
-  
-  // Platformları tanımla
-  platforms = new ArrayList<Platform>();
-  platforms.add(new Platform(200, 400, 200, 20));
-  platforms.add(new Platform(500, 300, 200, 20));
-  platforms.add(new Platform(800, 200, 200, 20));
-  
-  // Coinleri tanımla
+
+    // Coinleri tanımla
   coins = new ArrayList<Coin>();
   coins.add(new Coin(250, 370, 30));
   coins.add(new Coin(550, 270, 30));
   coins.add(new Coin(850, 170, 30));
 }
 
-void draw() {
-  if (!gameStarted) {
-    displayCharacterSelection();
-  } else {
-    displayGameScene();
-    applyGravity();
-    checkGround();
-    updateCharacterPosition();
-    handleMovement();
-    checkCoinCollision();
-    checkPlatformCollision();
-    displayPlatforms();
-    displayCoins();
-  }
-}
 
 void displayCharacterSelection() {
   image(wall, 0, 0, width, height);
@@ -92,35 +81,37 @@ void displayCharacterSelection() {
 }
 
 void displayGameScene() {
+  int characterIndex = selectedCharacter - 1;
+  image(backgrounds[characterIndex][currentScene], 0, 0, width, height);
+
   if (selectedCharacter == 1) {
-    image(wall1_1, 0, 0, width, height); // Duvar resmi wall1_1 tam ekran
-    image(character1, characterX, characterY); // Seçilen karakteri hareket ettir
+    image(character1, characterX, characterY);
     characterWidth = character1.width;
     characterHeight = character1.height;
   } else if (selectedCharacter == 2) {
-    image(wall2_1, 0, 0, width, height); // Duvar resmi wall2_1 tam ekran
-    image(character2, characterX, characterY); // Seçilen karakteri hareket ettir
+    image(character2, characterX, characterY);
     characterWidth = character2.width;
     characterHeight = character2.height;
   } else if (selectedCharacter == 3) {
-    image(wall2_2, 0, 0, width, height); // Duvar resmi wall2_2 tam ekran
-    image(character3, characterX, characterY); // Seçilen karakteri hareket ettir
+    image(character3, characterX, characterY);
     characterWidth = character3.width;
     characterHeight = character3.height;
   }
-  
-  // Coin sayısını ekrana yazdır
+
   fill(255);
   textAlign(LEFT, TOP);
   text("Coins: " + coinsCollected, 10, 10);
-}
 
-void displayPlatforms() {
-  fill(139, 69, 19);
-  for (Platform platform : platforms) {
-    rect(platform.x, platform.y, platform.width, platform.height);
+  // Sahne değişimi
+  if (characterX + characterWidth >= width) {
+    currentScene++;
+    if (currentScene >= backgrounds[characterIndex].length) {
+      currentScene = 0; // Eğer son sahneye gelindiyse tekrar başa döner.
+    }
+    characterX = 0; // Karakter başlangıç noktasına döner
   }
 }
+
 
 void displayCoins() {
   fill(255, 215, 0);
@@ -146,14 +137,52 @@ void checkCoinCollision() {
 
 void checkPlatformCollision() {
   onGround = false;
-  for (Platform platform : platforms) {
-    if (characterX + characterWidth > platform.x && characterX < platform.x + platform.width &&
-        characterY + characterHeight >= platform.y && characterY + characterHeight - velocityY <= platform.y &&
+  
+  float[][] platforms;
+  if (currentScene == 0) {
+    platforms = new float[][] {
+      {200, 400, 200, 20},
+      {500, 300, 200, 20},
+      {800, 200, 200, 20}
+    };
+  } else if (currentScene == 1) {
+    platforms = new float[][] {
+      {250, 350, 150, 20},
+      {550, 250, 150, 20},
+      {750, 150, 150, 20}
+    };
+  } else if (currentScene == 2) {
+    platforms = new float[][] {
+      {100, 450, 200, 20},
+      {400, 350, 200, 20},
+      {700, 250, 200, 20}
+    };
+  } else {
+    platforms = new float[][] {};
+  }
+  
+  for (float[] platform : platforms) {
+    if (characterX + characterWidth > platform[0] && characterX < platform[0] + platform[2] &&
+        characterY + characterHeight >= platform[1] && characterY + characterHeight - velocityY <= platform[1] &&
         velocityY >= 0) {
-      characterY = platform.y - characterHeight; // Karakterin platforma tam oturmasını sağlamak için
+      characterY = platform[1] - characterHeight;
       velocityY = 0;
       onGround = true;
     }
+  }
+}
+void draw() {
+  if (!gameStarted) {
+    displayCharacterSelection();
+  } else {
+    displayGameScene();
+    applyGravity();
+    checkGround();
+    updateCharacterPosition();
+    handleMovement();
+    checkCoinCollision();
+    checkPlatformCollision();
+    displayCoins();
   }
 }
 
