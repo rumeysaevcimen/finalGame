@@ -11,7 +11,7 @@ float characterY;
 float characterWidth;
 float characterHeight;
 float gravity = 0.6;
-float jump = -15;
+float jump = -16;
 float velocityY = 0;
 float velocityX = 0;
 float moveSpeed = 5;
@@ -21,6 +21,9 @@ boolean upPressed = false;
 int coinsCollected = 0;
 
 ArrayList<Coin> coins;
+
+// Her karakter ve sahne için platform koordinatları
+float[][][] characterPlatforms;
 
 void setup() {
   size(1000, 550);
@@ -48,18 +51,36 @@ void setup() {
   character2 = loadImage("character2.png");
   character3 = loadImage("character3.png");
 
-  character1.resize(200, 200);
+  character1.resize(150, 150);
   character2.resize(200, 200);
   character3.resize(130, 130);
   characterY = height / 2;
 
-    // Coinleri tanımla
+  // Coinleri tanımla
   coins = new ArrayList<Coin>();
   coins.add(new Coin(250, 370, 30));
   coins.add(new Coin(550, 270, 30));
   coins.add(new Coin(850, 170, 30));
-}
 
+  // Her karakter ve sahne için platform koordinatlarını tanımlayın
+  characterPlatforms = new float[][][] {
+    { // Karakter 1'in sahneleri
+      {226, 300, 30, 20}, {498, 235, 20, 20}, {700, 300, 80, 20}, // Sahne 0
+      {260, 413, 150, 20}, {513, 229, 90, 20}, {790, 413, 150, 20}, // Sahne 1
+      {90, 500, 200, 20}, {90, 500, 200, 20}, {90, 500, 200, 20}  // Sahne 2
+    },
+    { // Karakter 2'nin sahneleri
+      {130, 402, 0, 0}, {498, 402, 0, 0}, {755, 402, 0, 0}, // Sahne 0
+      {257, 402, 0, 0}, {257, 402, 0, 0}, {257, 402, 0, 0}, // Sahne 1
+      {100, 402, 0, 0}, {100, 402, 0, 0}, {100, 402, 0, 0}  // Sahne 2
+    },
+    { // Karakter 3'ün sahneleri
+      {226, 269, 200, 20}, {498, 223, 200, 20}, {755, 286, 200, 20}, // Sahne 0
+      {257, 402, 150, 20}, {513, 216, 150, 20}, {786, 401, 150, 20}, // Sahne 1
+      {100, 450, 200, 20}, {400, 350, 200, 20}, {700, 250, 200, 20}  // Sahne 2
+    }
+  };
+}
 
 void displayCharacterSelection() {
   image(wall, 0, 0, width, height);
@@ -112,7 +133,6 @@ void displayGameScene() {
   }
 }
 
-
 void displayCoins() {
   fill(255, 215, 0);
   for (Coin coin : coins) {
@@ -137,31 +157,12 @@ void checkCoinCollision() {
 
 void checkPlatformCollision() {
   onGround = false;
+
+  int characterIndex = selectedCharacter - 1;
+  int platformStartIndex = currentScene * 3;
   
-  float[][] platforms;
-  if (currentScene == 0) {
-    platforms = new float[][] {
-      {200, 400, 200, 20},
-      {500, 300, 200, 20},
-      {800, 200, 200, 20}
-    };
-  } else if (currentScene == 1) {
-    platforms = new float[][] {
-      {250, 350, 150, 20},
-      {550, 250, 150, 20},
-      {750, 150, 150, 20}
-    };
-  } else if (currentScene == 2) {
-    platforms = new float[][] {
-      {100, 450, 200, 20},
-      {400, 350, 200, 20},
-      {700, 250, 200, 20}
-    };
-  } else {
-    platforms = new float[][] {};
-  }
-  
-  for (float[] platform : platforms) {
+  for (int i = 0; i < 3; i++) {
+    float[] platform = characterPlatforms[characterIndex][platformStartIndex + i];
     if (characterX + characterWidth > platform[0] && characterX < platform[0] + platform[2] &&
         characterY + characterHeight >= platform[1] && characterY + characterHeight - velocityY <= platform[1] &&
         velocityY >= 0) {
@@ -171,6 +172,7 @@ void checkPlatformCollision() {
     }
   }
 }
+
 void draw() {
   if (!gameStarted) {
     displayCharacterSelection();
@@ -187,6 +189,7 @@ void draw() {
 }
 
 void mousePressed() {
+  println("Mouse tıklandı: (" + mouseX + ", " + mouseY + ")");
   if (!gameStarted) {
     // Karakter 1'in koordinatları (Örnek olarak)
     if (mouseX > 150 && mouseX < 350 && mouseY > 200 && mouseY < 400) {
@@ -228,7 +231,7 @@ void checkGround() {
 
 void updateCharacterPosition() {
   characterX += velocityX;
-  
+
   // Kenarlara çarpmasını önleyin
   if (characterX < 0) {
     characterX = 0;
@@ -265,7 +268,7 @@ void keyReleased() {
 
 class Platform {
   float x, y, width, height;
-  
+
   Platform(float x, float y, float width, float height) {
     this.x = x;
     this.y = y;
@@ -277,7 +280,7 @@ class Platform {
 class Coin {
   float x, y, size;
   boolean collected;
-  
+
   Coin(float x, float y, float size) {
     this.x = x;
     this.y = y;
