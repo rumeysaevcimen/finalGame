@@ -20,11 +20,11 @@ boolean onGround = true;
 boolean upPressed = false;
 
 int livesCollected = 0;
+int livesRemaining = 1; 
 
-ArrayList<Live> lives;
-
-// Her karakter ve sahne için platform koordinatlarını tanımlayan ArrayList
+ArrayList<Live>[][] lives;
 ArrayList<ArrayList<ArrayList<float[]>>> characterPlatforms;
+ArrayList<ArrayList<ArrayList<float[]>>> gameOverZones;
 
 void setup() {
   size(1000, 550);
@@ -55,20 +55,44 @@ void setup() {
 
   character1.resize(150, 150);
   character2.resize(200, 200);
-  character3.resize(130, 130);
+  character3.resize(110, 110);
   heartIcon.resize(40, 40);
   characterY = height / 2;
 
-  // Canları tanımla
-  lives = new ArrayList<Live>();
-  lives.add(new Live(250, 370));
-  lives.add(new Live(550, 270));
-  lives.add(new Live(850, 170));
+  lives = new ArrayList[backgrounds.length][];
+  for (int i = 0; i < backgrounds.length; i++) {
+    lives[i] = new ArrayList[backgrounds[i].length];
+    for (int j = 0; j < backgrounds[i].length; j++) {
+      lives[i][j] = new ArrayList<Live>();
+    }
+  }
 
-  // Platform koordinatlarını tanımla
+  lives[0][0].add(new Live(225, 240));
+  lives[0][0].add(new Live(483, 175));
+  lives[0][0].add(new Live(740, 245));
+
+  lives[0][1].add(new Live(500, 170));
+
+  lives[0][2].add(new Live(290, 445));
+  lives[0][2].add(new Live(515, 445));
+  
+  lives[1][0].add(new Live(296, 182));
+  lives[1][0].add(new Live(682, 142));
+  
+  lives[1][1].add(new Live(645, 110));
+  
+  lives[1][2].add(new Live(273, 278));
+
+  lives[2][0].add(new Live(290, 245));
+  lives[2][0].add(new Live(778, 420));
+  
+  lives[2][1].add(new Live(570, 120));
+  
+  lives[2][2].add(new Live(321, 190));
+  lives[2][2].add(new Live(730, 85));
+
   characterPlatforms = new ArrayList<ArrayList<ArrayList<float[]>>>();
 
-  // Karakter 1'in platformları
   ArrayList<ArrayList<float[]>> character1Platforms = new ArrayList<ArrayList<float[]>>();
   ArrayList<float[]> character1Scene0 = new ArrayList<float[]>();
   character1Scene0.add(new float[]{226, 300, 30, 20});
@@ -77,9 +101,9 @@ void setup() {
   character1Platforms.add(character1Scene0);
 
   ArrayList<float[]> character1Scene1 = new ArrayList<float[]>();
-  character1Scene1.add(new float[]{260, 413, 150, 20});
-  character1Scene1.add(new float[]{513, 229, 90, 20});
-  character1Scene1.add(new float[]{790, 413, 150, 20});
+  character1Scene1.add(new float[]{260, 413, 0, 20});
+  character1Scene1.add(new float[]{513, 229, 0, 20});
+  character1Scene1.add(new float[]{790, 413, 0, 20});
   character1Platforms.add(character1Scene1);
 
   ArrayList<float[]> character1Scene2 = new ArrayList<float[]>();
@@ -88,7 +112,6 @@ void setup() {
 
   characterPlatforms.add(character1Platforms);
 
-  // Karakter 2'nin platformları
   ArrayList<ArrayList<float[]>> character2Platforms = new ArrayList<ArrayList<float[]>>();
   ArrayList<float[]> character2Scene0 = new ArrayList<float[]>();
   character2Scene0.add(new float[]{130, 402, 0, 0});
@@ -106,7 +129,6 @@ void setup() {
 
   characterPlatforms.add(character2Platforms);
 
-  // Karakter 3'ün platformları
   ArrayList<ArrayList<float[]>> character3Platforms = new ArrayList<ArrayList<float[]>>();
   ArrayList<float[]> character3Scene0 = new ArrayList<float[]>();
   character3Scene0.add(new float[]{270, 320, 200, 20});
@@ -130,12 +152,74 @@ void setup() {
   character3Platforms.add(character3Scene2);
 
   characterPlatforms.add(character3Platforms);
+
+  // game over durumları
+  gameOverZones = new ArrayList<ArrayList<ArrayList<float[]>>>();
+
+  ArrayList<ArrayList<float[]>> character1GameOverZones = new ArrayList<ArrayList<float[]>>();
+  ArrayList<float[]> character1GameOverScene0 = new ArrayList<float[]>();
+  character1GameOverScene0.add(new float[]{230, 415, 0, 20});
+  character1GameOverScene0.add(new float[]{747, 415, 0, 20});
+  character1GameOverZones.add(character1GameOverScene0);
+
+  ArrayList<float[]> character1GameOverScene1 = new ArrayList<float[]>();
+  character1GameOverScene1.add(new float[]{500, 490, 30, 20}); // Example zone
+  character1GameOverZones.add(character1GameOverScene1);
+
+  ArrayList<float[]> character1GameOverScene2 = new ArrayList<float[]>();
+  character1GameOverScene2.add(new float[]{195, 130, 0, 0}); 
+  character1GameOverScene2.add(new float[]{418, 430, 0, 0}); 
+  character1GameOverScene2.add(new float[]{634, 438, 0, 0});
+  character1GameOverZones.add(character1GameOverScene2);
+
+  gameOverZones.add(character1GameOverZones);
+  
+  //karakter 2
+  ArrayList<ArrayList<float[]>> character2GameOverZones = new ArrayList<ArrayList<float[]>>();
+  ArrayList<float[]> character2GameOverScene0 = new ArrayList<float[]>();
+  character2GameOverScene0.add(new float[]{175, 140, 0, 0});
+  character2GameOverScene0.add(new float[]{447, 140, 0, 0});
+  character2GameOverScene0.add(new float[]{844, 140, 0, 0});
+  character2GameOverZones.add(character2GameOverScene0);
+
+  ArrayList<float[]> character2GameOverScene1 = new ArrayList<float[]>();
+  character2GameOverScene1.add(new float[]{0, 0, 1000, 20}); // Example zone
+  character2GameOverZones.add(character2GameOverScene1);
+
+  ArrayList<float[]> character2GameOverScene2 = new ArrayList<float[]>();
+  character2GameOverScene2.add(new float[]{0, 0, 1000, 20}); // Example zone
+  character2GameOverZones.add(character2GameOverScene2);
+
+  gameOverZones.add(character2GameOverZones);
+
+  ArrayList<ArrayList<float[]>> character3GameOverZones = new ArrayList<ArrayList<float[]>>();
+  ArrayList<float[]> character3GameOverScene0 = new ArrayList<float[]>();
+  character3GameOverScene0.add(new float[]{0, 0, 1000, 20}); // Example zone
+  character3GameOverZones.add(character3GameOverScene0);
+
+  ArrayList<float[]> character3GameOverScene1 = new ArrayList<float[]>();
+  character3GameOverScene1.add(new float[]{0, 0, 1000, 20}); // Example zone
+  character3GameOverZones.add(character3GameOverScene1);
+
+  ArrayList<float[]> character3GameOverScene2 = new ArrayList<float[]>();
+  character3GameOverScene2.add(new float[]{0, 0, 1000, 20}); // Example zone
+  character3GameOverZones.add(character3GameOverScene2);
+
+  gameOverZones.add(character3GameOverZones);
+  resetCharacterPosition();
+}
+
+void resetCharacterPosition() {
+  characterX = 50;
+  characterY = height / 2;
+  velocityX = 0;
+  velocityY = 0;
+  onGround = true;
 }
 
 void displayCharacterSelection() {
   image(wall, 0, 0, width, height);
 
-  // Seçilen karakterin üzerine "Selected" yazısı ekle
   if (selectedCharacter == 1) {
     fill(255);
     textAlign(CENTER, CENTER);
@@ -169,22 +253,24 @@ void displayGameScene() {
     characterHeight = character3.height;
   }
 
-  fill(255);
+  fill(#3E0B0C);
+  textSize(22); 
   textAlign(LEFT, TOP);
-  text("Lives: " + livesCollected, 10, 10);
+  text("LIVES: " + livesRemaining, 15, 15);
+  textSize(12);
 
-  // Sahne değişimi
   if (characterX + characterWidth >= width) {
     currentScene++;
     if (currentScene >= backgrounds[characterIndex].length) {
-      currentScene = 0; // Eğer son sahneye gelindiyse tekrar başa döner.
+      currentScene = 0;
     }
-    characterX = 0; // Karakter başlangıç noktasına döner
+    characterX = 0;
   }
 }
 
+
 void displayLives() {
-  for (Live live : lives) {
+  for (Live live : lives[selectedCharacter - 1][currentScene]) {
     if (!live.collected) {
       image(heartIcon, live.x, live.y);
     }
@@ -192,7 +278,7 @@ void displayLives() {
 }
 
 void checkLiveCollision() {
-  for (Live live : lives) {
+  for (Live live : lives[selectedCharacter - 1][currentScene]) {
     if (!live.collected && 
         characterX < live.x + heartIcon.width / 2 && 
         characterX + characterWidth > live.x - heartIcon.width / 2 && 
@@ -200,8 +286,13 @@ void checkLiveCollision() {
         characterY + characterHeight > live.y - heartIcon.height / 2) {
       live.collected = true;
       livesCollected++;
+      increaseLife(); // Can toplandığında can sayısını artır
     }
   }
+}
+
+void increaseLife() {
+  livesRemaining++; // Can sayısını artır
 }
 
 void checkPlatformCollision() {
@@ -221,6 +312,31 @@ void checkPlatformCollision() {
   }
 }
 
+void checkGameOver() {
+  if (livesRemaining <= 0) {
+    fill(255, 0, 0);
+    textSize(64);
+    textAlign(CENTER, CENTER);
+    text("GAME OVER", width / 2, height / 2);
+    noLoop();
+  }
+}
+
+void checkGameOverZoneCollision() {
+  int characterIndex = selectedCharacter - 1;
+  ArrayList<float[]> currentGameOverZones = gameOverZones.get(characterIndex).get(currentScene);
+  
+  for (float[] zone : currentGameOverZones) {
+    if (characterX + characterWidth > zone[0] && characterX < zone[0] + zone[2] &&
+        characterY + characterHeight > zone[1] && characterY < zone[1] + zone[3]) {
+      reduceLife();
+      if (livesRemaining > 0) {
+        resetCharacterPosition(); // Karakter pozisyonunu sıfırla
+      }
+    }
+  }
+}
+
 void draw() {
   if (!gameStarted) {
     displayCharacterSelection();
@@ -230,34 +346,30 @@ void draw() {
     checkGround();
     updateCharacterPosition();
     handleMovement();
-    checkLiveCollision(); // Değişiklik burada
+    checkLiveCollision();
     checkPlatformCollision();
-    displayLives(); // Değişiklik burada
+    checkGameOverZoneCollision(); // Check for game over zones collision
+    displayLives();
+    checkGameOver(); // Can sayısını kontrol et
   }
 }
 
 void mousePressed() {
   println("Mouse tıklandı: (" + mouseX + ", " + mouseY + ")");
   if (!gameStarted) {
-    // Karakter 1'in koordinatları (Örnek olarak)
     if (mouseX > 150 && mouseX < 350 && mouseY > 200 && mouseY < 400) {
       selectedCharacter = 1;
       characterSelected = true;
-    }
-    // Karakter 2'nin koordinatları (Örnek olarak)
-    else if (mouseX > 400 && mouseX < 600 && mouseY > 200 && mouseY < 400) {
+    } else if (mouseX > 400 && mouseX < 600 && mouseY > 200 && mouseY < 400) {
       selectedCharacter = 2;
       characterSelected = true;
-    }
-    // Karakter 3'ün koordinatları (Örnek olarak)
-    else if (mouseX > 650 && mouseX < 780 && mouseY > 200 && mouseY < 400) {
+    } else if (mouseX > 650 && mouseX < 780 && mouseY > 200 && mouseY < 400) {
       selectedCharacter = 3;
       characterSelected = true;
     }
 
-    // Start butonunun koordinatları (Örnek olarak)
     if (characterSelected && mouseX > 450 && mouseX < 550 && mouseY > 450 && mouseY < 500) {
-      gameStarted = true; // Start button clicked
+      gameStarted = true;
     }
   }
 }
@@ -280,7 +392,6 @@ void checkGround() {
 void updateCharacterPosition() {
   characterX += velocityX;
 
-  // Kenarlara çarpmasını önleyin
   if (characterX < 0) {
     characterX = 0;
   } else if (characterX + characterWidth > width) {
@@ -302,7 +413,7 @@ void handleMovement() {
       }
     }
   } else {
-    velocityX = 0; // Tuş bırakıldığında yatay hareket durur
+    velocityX = 0;
   }
 }
 
@@ -311,6 +422,15 @@ void keyReleased() {
     if (keyCode == UP) {
       upPressed = false;
     }
+  }
+}
+
+void reduceLife() {
+  livesRemaining--;
+  if (livesRemaining < 0) {
+    livesRemaining = 0;
+  } else {
+    resetCharacterPosition(); // Karakter pozisyonunu sıfırla
   }
 }
 
