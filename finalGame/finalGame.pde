@@ -249,6 +249,15 @@ void displayGameScene() {
   }
 
   image(backgrounds[characterIndex][currentScene], 0, 0, width, height);
+  
+  // Sahne kontrolü ekle
+  if (currentScene == 2 && characterIndex == 1) {
+    image(finish2, width - finish2.width, height - finish2.height);
+  } else {
+    // Diğer sahnelerde arkaplan resmini ekrana ekle
+    image(backgrounds[characterIndex][currentScene], 0, 0, width, height);
+  }
+  
 
   if (selectedCharacter == 1) {
     image(character1, characterX, characterY);
