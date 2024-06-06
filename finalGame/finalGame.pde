@@ -206,7 +206,7 @@ void setup() {
   character3GameOverZones.add(character3GameOverScene2);
 
   gameOverZones.add(character3GameOverZones);
-  resetCharacterPosition();
+  //resetCharacterPosition();
 }
 
 void resetCharacterPosition() {
