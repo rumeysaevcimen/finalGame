@@ -1,5 +1,6 @@
 PImage wall, wall1_1, wall2_1, wall3_1;
 PImage character1, character2, character3;
+PImage heartIcon;
 PImage[][] backgrounds;
 int currentScene = 0;
 int selectedCharacter = 0;
@@ -11,19 +12,19 @@ float characterY;
 float characterWidth;
 float characterHeight;
 float gravity = 0.6;
-float jump = -16;
+float jump = -19;
 float velocityY = 0;
 float velocityX = 0;
 float moveSpeed = 5;
 boolean onGround = true;
 boolean upPressed = false;
 
-int coinsCollected = 0;
+int livesCollected = 0;
 
-ArrayList<Coin> coins;
+ArrayList<Live> lives;
 
-// Her karakter ve sahne için platform koordinatları
-float[][][] characterPlatforms;
+// Her karakter ve sahne için platform koordinatlarını tanımlayan ArrayList
+ArrayList<ArrayList<ArrayList<float[]>>> characterPlatforms;
 
 void setup() {
   size(1000, 550);
@@ -50,36 +51,85 @@ void setup() {
   character1 = loadImage("c1move.png");
   character2 = loadImage("character2.png");
   character3 = loadImage("character3.png");
+  heartIcon = loadImage("heart.png");
 
   character1.resize(150, 150);
   character2.resize(200, 200);
   character3.resize(130, 130);
+  heartIcon.resize(40, 40);
   characterY = height / 2;
 
-  // Coinleri tanımla
-  coins = new ArrayList<Coin>();
-  coins.add(new Coin(250, 370, 30));
-  coins.add(new Coin(550, 270, 30));
-  coins.add(new Coin(850, 170, 30));
+  // Canları tanımla
+  lives = new ArrayList<Live>();
+  lives.add(new Live(250, 370));
+  lives.add(new Live(550, 270));
+  lives.add(new Live(850, 170));
 
-  // Her karakter ve sahne için platform koordinatlarını tanımlayın
-  characterPlatforms = new float[][][] {
-    { // Karakter 1'in sahneleri
-      {226, 300, 30, 20}, {498, 235, 20, 20}, {700, 300, 80, 20}, // Sahne 0
-      {260, 413, 150, 20}, {513, 229, 90, 20}, {790, 413, 150, 20}, // Sahne 1
-      {90, 500, 200, 20}, {90, 500, 200, 20}, {90, 500, 200, 20}  // Sahne 2
-    },
-    { // Karakter 2'nin sahneleri
-      {130, 402, 0, 0}, {498, 402, 0, 0}, {755, 402, 0, 0}, // Sahne 0
-      {257, 402, 0, 0}, {257, 402, 0, 0}, {257, 402, 0, 0}, // Sahne 1
-      {100, 402, 0, 0}, {100, 402, 0, 0}, {100, 402, 0, 0}  // Sahne 2
-    },
-    { // Karakter 3'ün sahneleri
-      {226, 269, 200, 20}, {498, 223, 200, 20}, {755, 286, 200, 20}, // Sahne 0
-      {257, 402, 150, 20}, {513, 216, 150, 20}, {786, 401, 150, 20}, // Sahne 1
-      {100, 450, 200, 20}, {400, 350, 200, 20}, {700, 250, 200, 20}  // Sahne 2
-    }
-  };
+  // Platform koordinatlarını tanımla
+  characterPlatforms = new ArrayList<ArrayList<ArrayList<float[]>>>();
+
+  // Karakter 1'in platformları
+  ArrayList<ArrayList<float[]>> character1Platforms = new ArrayList<ArrayList<float[]>>();
+  ArrayList<float[]> character1Scene0 = new ArrayList<float[]>();
+  character1Scene0.add(new float[]{226, 300, 30, 20});
+  character1Scene0.add(new float[]{498, 235, 20, 20});
+  character1Scene0.add(new float[]{700, 300, 80, 20});
+  character1Platforms.add(character1Scene0);
+
+  ArrayList<float[]> character1Scene1 = new ArrayList<float[]>();
+  character1Scene1.add(new float[]{260, 413, 150, 20});
+  character1Scene1.add(new float[]{513, 229, 90, 20});
+  character1Scene1.add(new float[]{790, 413, 150, 20});
+  character1Platforms.add(character1Scene1);
+
+  ArrayList<float[]> character1Scene2 = new ArrayList<float[]>();
+  character1Scene2.add(new float[]{90, 500, 200, 20});
+  character1Platforms.add(character1Scene2);
+
+  characterPlatforms.add(character1Platforms);
+
+  // Karakter 2'nin platformları
+  ArrayList<ArrayList<float[]>> character2Platforms = new ArrayList<ArrayList<float[]>>();
+  ArrayList<float[]> character2Scene0 = new ArrayList<float[]>();
+  character2Scene0.add(new float[]{130, 402, 0, 0});
+  character2Scene0.add(new float[]{498, 402, 0, 0});
+  character2Scene0.add(new float[]{755, 402, 0, 0});
+  character2Platforms.add(character2Scene0);
+
+  ArrayList<float[]> character2Scene1 = new ArrayList<float[]>();
+  character2Scene1.add(new float[]{257, 402, 0, 0});
+  character2Platforms.add(character2Scene1);
+
+  ArrayList<float[]> character2Scene2 = new ArrayList<float[]>();
+  character2Scene2.add(new float[]{100, 402, 0, 0});
+  character2Platforms.add(character2Scene2);
+
+  characterPlatforms.add(character2Platforms);
+
+  // Karakter 3'ün platformları
+  ArrayList<ArrayList<float[]>> character3Platforms = new ArrayList<ArrayList<float[]>>();
+  ArrayList<float[]> character3Scene0 = new ArrayList<float[]>();
+  character3Scene0.add(new float[]{270, 320, 200, 20});
+  character3Scene0.add(new float[]{498, 223, 200, 20});
+  character3Scene0.add(new float[]{755, 286, 200, 20});
+  character3Platforms.add(character3Scene0);
+
+  ArrayList<float[]> character3Scene1 = new ArrayList<float[]>();
+  character3Scene1.add(new float[]{125, 260, 150, 20});
+  character3Scene1.add(new float[]{357, 330, 150, 20});
+  character3Scene1.add(new float[]{510, 186, 150, 20});
+  character3Scene1.add(new float[]{739, 260, 150, 20});
+  character3Platforms.add(character3Scene1);
+
+  ArrayList<float[]> character3Scene2 = new ArrayList<float[]>();
+  character3Scene2.add(new float[]{94, 308, 200, 20});
+  character3Scene2.add(new float[]{278, 239, 200, 20});
+  character3Scene2.add(new float[]{505, 185, 200, 20});
+  character3Scene2.add(new float[]{692, 130, 100, 20});
+  character3Scene2.add(new float[]{858, 210, 100, 20});
+  character3Platforms.add(character3Scene2);
+
+  characterPlatforms.add(character3Platforms);
 }
 
 void displayCharacterSelection() {
@@ -121,7 +171,7 @@ void displayGameScene() {
 
   fill(255);
   textAlign(LEFT, TOP);
-  text("Coins: " + coinsCollected, 10, 10);
+  text("Lives: " + livesCollected, 10, 10);
 
   // Sahne değişimi
   if (characterX + characterWidth >= width) {
@@ -133,24 +183,23 @@ void displayGameScene() {
   }
 }
 
-void displayCoins() {
-  fill(255, 215, 0);
-  for (Coin coin : coins) {
-    if (!coin.collected) {
-      ellipse(coin.x, coin.y, coin.size, coin.size);
+void displayLives() {
+  for (Live live : lives) {
+    if (!live.collected) {
+      image(heartIcon, live.x, live.y);
     }
   }
 }
 
-void checkCoinCollision() {
-  for (Coin coin : coins) {
-    if (!coin.collected && 
-        characterX < coin.x + coin.size / 2 && 
-        characterX + characterWidth > coin.x - coin.size / 2 && 
-        characterY < coin.y + coin.size / 2 && 
-        characterY + characterHeight > coin.y - coin.size / 2) {
-      coin.collected = true;
-      coinsCollected++;
+void checkLiveCollision() {
+  for (Live live : lives) {
+    if (!live.collected && 
+        characterX < live.x + heartIcon.width / 2 && 
+        characterX + characterWidth > live.x - heartIcon.width / 2 && 
+        characterY < live.y + heartIcon.height / 2 && 
+        characterY + characterHeight > live.y - heartIcon.height / 2) {
+      live.collected = true;
+      livesCollected++;
     }
   }
 }
@@ -159,10 +208,9 @@ void checkPlatformCollision() {
   onGround = false;
 
   int characterIndex = selectedCharacter - 1;
-  int platformStartIndex = currentScene * 3;
+  ArrayList<float[]> currentPlatforms = characterPlatforms.get(characterIndex).get(currentScene);
   
-  for (int i = 0; i < 3; i++) {
-    float[] platform = characterPlatforms[characterIndex][platformStartIndex + i];
+  for (float[] platform : currentPlatforms) {
     if (characterX + characterWidth > platform[0] && characterX < platform[0] + platform[2] &&
         characterY + characterHeight >= platform[1] && characterY + characterHeight - velocityY <= platform[1] &&
         velocityY >= 0) {
@@ -182,9 +230,9 @@ void draw() {
     checkGround();
     updateCharacterPosition();
     handleMovement();
-    checkCoinCollision();
+    checkLiveCollision(); // Değişiklik burada
     checkPlatformCollision();
-    displayCoins();
+    displayLives(); // Değişiklik burada
   }
 }
 
@@ -277,14 +325,13 @@ class Platform {
   }
 }
 
-class Coin {
-  float x, y, size;
+class Live {
+  float x, y;
   boolean collected;
 
-  Coin(float x, float y, float size) {
+  Live(float x, float y) {
     this.x = x;
     this.y = y;
-    this.size = size;
     this.collected = false;
   }
 }
