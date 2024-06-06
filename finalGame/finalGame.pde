@@ -331,7 +331,7 @@ void checkGameOverZoneCollision() {
         characterY + characterHeight > zone[1] && characterY < zone[1] + zone[3]) {
       reduceLife();
       if (livesRemaining > 0) {
-        resetCharacterPosition(); // Karakter pozisyonunu sıfırla
+        characterX = characterX - 70;
       }
     }
   }
@@ -430,7 +430,7 @@ void reduceLife() {
   if (livesRemaining < 0) {
     livesRemaining = 0;
   } else {
-    resetCharacterPosition(); // Karakter pozisyonunu sıfırla
+    //resetCharacterPosition(); // Karakter pozisyonunu sıfırla
   }
 }
 
