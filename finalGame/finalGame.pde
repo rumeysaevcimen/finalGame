@@ -1,5 +1,6 @@
 PImage wall, wall1_1, wall2_1, wall3_1;
 PImage character1, character2, character3;
+PImage endScene; 
 PImage heartIcon;
 PImage[][] backgrounds;
 int currentScene = 0;
@@ -29,7 +30,8 @@ ArrayList<ArrayList<ArrayList<float[]>>> gameOverZones;
 void setup() {
   size(1000, 550);
   wall = loadImage("wall0.png");
-
+  endScene = loadImage("endScene.png");
+  
   wall1_1 = loadImage("wall1.1.png");
   PImage wall1_2 = loadImage("wall1.2.png");
   PImage wall1_3 = loadImage("wall1.3.png");
@@ -47,7 +49,8 @@ void setup() {
     {wall2_1, wall2_2, wall2_3},
     {wall3_1, wall3_2, wall3_3}
   };
-
+  
+  
   character1 = loadImage("c1move.png");
   character2 = loadImage("character2.png");
   character3 = loadImage("character3.png");
@@ -237,6 +240,14 @@ void displayCharacterSelection() {
 
 void displayGameScene() {
   int characterIndex = selectedCharacter - 1;
+
+  if (currentScene >= backgrounds[characterIndex].length) {
+    image(endScene, 0, 0, width, height);
+    fill(255);
+    noLoop();
+    return;
+  }
+
   image(backgrounds[characterIndex][currentScene], 0, 0, width, height);
 
   if (selectedCharacter == 1) {
@@ -262,14 +273,15 @@ void displayGameScene() {
   if (characterX + characterWidth >= width) {
     currentScene++;
     if (currentScene >= backgrounds[characterIndex].length) {
-      currentScene = 0;
+      currentScene = backgrounds[characterIndex].length; // Ensure it doesn't go out of bounds
     }
     characterX = 0;
   }
 }
 
-
 void displayLives() {
+  if (currentScene >= backgrounds[selectedCharacter - 1].length) return;
+
   for (Live live : lives[selectedCharacter - 1][currentScene]) {
     if (!live.collected) {
       image(heartIcon, live.x, live.y);
@@ -278,6 +290,8 @@ void displayLives() {
 }
 
 void checkLiveCollision() {
+  if (currentScene >= backgrounds[selectedCharacter - 1].length) return;
+
   for (Live live : lives[selectedCharacter - 1][currentScene]) {
     if (!live.collected && 
         characterX < live.x + heartIcon.width / 2 && 
@@ -296,6 +310,8 @@ void increaseLife() {
 }
 
 void checkPlatformCollision() {
+  if (currentScene >= backgrounds[selectedCharacter - 1].length) return;
+
   onGround = false;
 
   int characterIndex = selectedCharacter - 1;
@@ -312,6 +328,7 @@ void checkPlatformCollision() {
   }
 }
 
+
 void checkGameOver() {
   if (livesRemaining <= 0) {
     fill(255, 0, 0);
@@ -323,6 +340,8 @@ void checkGameOver() {
 }
 
 void checkGameOverZoneCollision() {
+  if (currentScene >= backgrounds[selectedCharacter - 1].length) return;
+
   int characterIndex = selectedCharacter - 1;
   ArrayList<float[]> currentGameOverZones = gameOverZones.get(characterIndex).get(currentScene);
   
@@ -337,20 +356,25 @@ void checkGameOverZoneCollision() {
   }
 }
 
+
 void draw() {
   if (!gameStarted) {
     displayCharacterSelection();
   } else {
-    displayGameScene();
-    applyGravity();
-    checkGround();
-    updateCharacterPosition();
-    handleMovement();
-    checkLiveCollision();
-    checkPlatformCollision();
-    checkGameOverZoneCollision(); // Check for game over zones collision
-    displayLives();
-    checkGameOver(); // Can sayısını kontrol et
+    if (currentScene >= backgrounds[selectedCharacter - 1].length) {
+      displayGameScene(); // Handle the end scene
+    } else {
+      displayGameScene();
+      applyGravity();
+      checkGround();
+      updateCharacterPosition();
+      handleMovement();
+      checkLiveCollision();
+      checkPlatformCollision();
+      checkGameOverZoneCollision(); 
+      displayLives();
+      checkGameOver(); // Can sayısını kontrol et
+    }
   }
 }
 
@@ -370,6 +394,15 @@ void mousePressed() {
 
     if (characterSelected && mouseX > 450 && mouseX < 550 && mouseY > 450 && mouseY < 500) {
       gameStarted = true;
+    }
+  } else {
+    if (currentScene >= backgrounds[selectedCharacter - 1].length) {
+      // EndScene'de tıklama işlemi
+      if (mouseX > 370 && mouseX < 610 && mouseY > 320 && mouseY < 370) {
+        currentScene = 0; // Wall0 sahnesine dön
+        resetCharacterPosition(); // Karakterin pozisyonunu sıfırla
+        loop(); // Loop'u tekrar başlat
+      }
     }
   }
 }
@@ -430,7 +463,7 @@ void reduceLife() {
   if (livesRemaining < 0) {
     livesRemaining = 0;
   } else {
-    //resetCharacterPosition(); // Karakter pozisyonunu sıfırla
+    //resetCharacterPosition();
   }
 }
 
