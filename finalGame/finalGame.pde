@@ -1,7 +1,7 @@
 PImage wall, wall1_1, wall2_1, wall3_1;
 PImage character1, character2, character3;
 PImage endScene; 
-PImage heartIcon;
+PImage heartIcon, dragon, crab, jellyfish, shark, diver, finish2, finish3;
 PImage[][] backgrounds;
 int currentScene = 0;
 int selectedCharacter = 0;
@@ -13,15 +13,32 @@ float characterY;
 float characterWidth;
 float characterHeight;
 float gravity = 0.6;
-float jump = -19;
+float jump = -20;
 float velocityY = 0;
 float velocityX = 0;
 float moveSpeed = 5;
 boolean onGround = true;
 boolean upPressed = false;
 
+float dragonX = 200; 
+float dragonY = 240; 
+float dragonSpeed = 3; 
+
+float crabX = 310;
+float crabY = 450;
+float crabSpeed = 2;
+
+float jellyfishX = 600;
+float jellyfishY = 450;
+float jellyfishSpeed = 3;
+
+float sharkX1 = 800; 
+float sharkY1 = 200;
+
+float sharkSpeed = 4; 
+
 int livesCollected = 0;
-int livesRemaining = 1; 
+int livesRemaining = 3; 
 
 ArrayList<Live>[][] lives;
 ArrayList<ArrayList<ArrayList<float[]>>> characterPlatforms;
@@ -49,17 +66,30 @@ void setup() {
     {wall2_1, wall2_2, wall2_3},
     {wall3_1, wall3_2, wall3_3}
   };
-  
+  dragon = loadImage("dragon.png");
+  crab = loadImage("crab.png");
+  jellyfish = loadImage("jellyfish.png");
+  shark = loadImage("shark.png");
+  diver = loadImage("diver.png");
+  finish2 = loadImage("finish2.png");
+  finish3 = loadImage("finish3.png");
   
   character1 = loadImage("c1move.png");
   character2 = loadImage("character2.png");
   character3 = loadImage("character3.png");
   heartIcon = loadImage("heart.png");
 
-  character1.resize(150, 150);
+  character1.resize(140, 140);
   character2.resize(200, 200);
   character3.resize(110, 110);
   heartIcon.resize(40, 40);
+  diver.resize(300, 300);
+  dragon.resize(140, 140);
+  crab.resize(100, 100);
+  jellyfish.resize(90,90);
+  shark.resize(160, 120);
+  finish2.resize(200, 200);
+  finish3.resize(110, 110);
   characterY = height / 2;
 
   lives = new ArrayList[backgrounds.length][];
@@ -94,6 +124,8 @@ void setup() {
   lives[2][2].add(new Live(321, 190));
   lives[2][2].add(new Live(730, 85));
 
+  //karakterlerin bulunacağı konumların koordinatları
+  
   characterPlatforms = new ArrayList<ArrayList<ArrayList<float[]>>>();
 
   ArrayList<ArrayList<float[]>> character1Platforms = new ArrayList<ArrayList<float[]>>();
@@ -106,7 +138,7 @@ void setup() {
   ArrayList<float[]> character1Scene1 = new ArrayList<float[]>();
   character1Scene1.add(new float[]{260, 413, 0, 20});
   character1Scene1.add(new float[]{513, 229, 0, 20});
-  character1Scene1.add(new float[]{790, 413, 0, 20});
+  character1Scene1.add(new float[]{735, 413, 0, 20});
   character1Platforms.add(character1Scene1);
 
   ArrayList<float[]> character1Scene2 = new ArrayList<float[]>();
@@ -134,16 +166,18 @@ void setup() {
 
   ArrayList<ArrayList<float[]>> character3Platforms = new ArrayList<ArrayList<float[]>>();
   ArrayList<float[]> character3Scene0 = new ArrayList<float[]>();
-  character3Scene0.add(new float[]{270, 320, 200, 20});
-  character3Scene0.add(new float[]{498, 223, 200, 20});
-  character3Scene0.add(new float[]{755, 286, 200, 20});
+  character3Scene0.add(new float[]{90, 410, 350, 0});
+  character3Scene0.add(new float[]{270, 310, 0, 20});
+  character3Scene0.add(new float[]{498, 223, 0, 20});
+  character3Scene0.add(new float[]{755, 286, 0, 20});
+  character3Scene0.add(new float[]{300, 510, 1000, 20});
   character3Platforms.add(character3Scene0);
 
   ArrayList<float[]> character3Scene1 = new ArrayList<float[]>();
-  character3Scene1.add(new float[]{125, 260, 150, 20});
-  character3Scene1.add(new float[]{357, 330, 150, 20});
-  character3Scene1.add(new float[]{510, 186, 150, 20});
-  character3Scene1.add(new float[]{739, 260, 150, 20});
+  character3Scene1.add(new float[]{129, 255, 170, 20});
+  character3Scene1.add(new float[]{357, 330, 100, 20});
+  character3Scene1.add(new float[]{510, 186, 140, 20});
+  character3Scene1.add(new float[]{739, 260, 180, 20});
   character3Platforms.add(character3Scene1);
 
   ArrayList<float[]> character3Scene2 = new ArrayList<float[]>();
@@ -156,9 +190,11 @@ void setup() {
 
   characterPlatforms.add(character3Platforms);
 
-  // game over durumları
+  // karakterin can sayısını etkileyen durumlar
+  
   gameOverZones = new ArrayList<ArrayList<ArrayList<float[]>>>();
-
+  
+  //karakter 1
   ArrayList<ArrayList<float[]>> character1GameOverZones = new ArrayList<ArrayList<float[]>>();
   ArrayList<float[]> character1GameOverScene0 = new ArrayList<float[]>();
   character1GameOverScene0.add(new float[]{230, 415, 0, 20});
@@ -166,13 +202,13 @@ void setup() {
   character1GameOverZones.add(character1GameOverScene0);
 
   ArrayList<float[]> character1GameOverScene1 = new ArrayList<float[]>();
-  character1GameOverScene1.add(new float[]{500, 490, 30, 20}); // Example zone
+  character1GameOverScene1.add(new float[]{500, 490, 30, 20});
   character1GameOverZones.add(character1GameOverScene1);
 
   ArrayList<float[]> character1GameOverScene2 = new ArrayList<float[]>();
-  character1GameOverScene2.add(new float[]{195, 130, 0, 0}); 
-  character1GameOverScene2.add(new float[]{418, 430, 0, 0}); 
-  character1GameOverScene2.add(new float[]{634, 438, 0, 0});
+  character1GameOverScene2.add(new float[]{195, 430, 0, 0}); 
+  character1GameOverScene2.add(new float[]{400, 430, 0, 0}); 
+  character1GameOverScene2.add(new float[]{615, 430, 0, 0});
   character1GameOverZones.add(character1GameOverScene2);
 
   gameOverZones.add(character1GameOverZones);
@@ -186,30 +222,30 @@ void setup() {
   character2GameOverZones.add(character2GameOverScene0);
 
   ArrayList<float[]> character2GameOverScene1 = new ArrayList<float[]>();
-  character2GameOverScene1.add(new float[]{0, 0, 1000, 20}); // Example zone
+  character2GameOverScene1.add(new float[]{0, 0, 1000, 20}); 
   character2GameOverZones.add(character2GameOverScene1);
 
   ArrayList<float[]> character2GameOverScene2 = new ArrayList<float[]>();
-  character2GameOverScene2.add(new float[]{0, 0, 1000, 20}); // Example zone
+  character2GameOverScene2.add(new float[]{0, 0, 1000, 20}); 
   character2GameOverZones.add(character2GameOverScene2);
 
   gameOverZones.add(character2GameOverZones);
-
+  
+  //karakter 3
   ArrayList<ArrayList<float[]>> character3GameOverZones = new ArrayList<ArrayList<float[]>>();
   ArrayList<float[]> character3GameOverScene0 = new ArrayList<float[]>();
-  character3GameOverScene0.add(new float[]{0, 0, 1000, 20}); // Example zone
+  character3GameOverScene0.add(new float[]{410, 440, 0, 20}); 
   character3GameOverZones.add(character3GameOverScene0);
 
   ArrayList<float[]> character3GameOverScene1 = new ArrayList<float[]>();
-  character3GameOverScene1.add(new float[]{0, 0, 1000, 20}); // Example zone
+  //character3GameOverScene1.add(new float[]{120, 250, 0, 20}); 
   character3GameOverZones.add(character3GameOverScene1);
 
   ArrayList<float[]> character3GameOverScene2 = new ArrayList<float[]>();
-  character3GameOverScene2.add(new float[]{0, 0, 1000, 20}); // Example zone
+  //character3GameOverScene2.add(new float[]{0, 0, 0, 20}); 
   character3GameOverZones.add(character3GameOverScene2);
 
   gameOverZones.add(character3GameOverZones);
-  //resetCharacterPosition();
 }
 
 void resetCharacterPosition() {
@@ -220,24 +256,26 @@ void resetCharacterPosition() {
   onGround = true;
 }
 
+//karakter seçimi ilk sahne
 void displayCharacterSelection() {
   image(wall, 0, 0, width, height);
 
+  textSize(24); 
+  fill(255, 0, 0); 
+
   if (selectedCharacter == 1) {
-    fill(255);
     textAlign(CENTER, CENTER);
     text("SELECTED", width / 4, height / 2 - character1.height / 2 - 20);
   } else if (selectedCharacter == 2) {
-    fill(255);
     textAlign(CENTER, CENTER);
     text("SELECTED", width / 2, height / 2 - character2.height / 2 - 20);
   } else if (selectedCharacter == 3) {
-    fill(255);
     textAlign(CENTER, CENTER);
     text("SELECTED", 3 * width / 4, height / 2 - character3.height / 2 - 20);
   }
 }
 
+//oyundaki sahnelerin yönetildiği fonksiyon
 void displayGameScene() {
   int characterIndex = selectedCharacter - 1;
 
@@ -249,15 +287,6 @@ void displayGameScene() {
   }
 
   image(backgrounds[characterIndex][currentScene], 0, 0, width, height);
-  
-  // Sahne kontrolü ekle
-  if (currentScene == 2 && characterIndex == 1) {
-    image(finish2, width - finish2.width, height - finish2.height);
-  } else {
-    // Diğer sahnelerde arkaplan resmini ekrana ekle
-    image(backgrounds[characterIndex][currentScene], 0, 0, width, height);
-  }
-  
 
   if (selectedCharacter == 1) {
     image(character1, characterX, characterY);
@@ -272,7 +301,13 @@ void displayGameScene() {
     characterWidth = character3.width;
     characterHeight = character3.height;
   }
-
+  if (currentScene == 2 && selectedCharacter == 2) {
+  image(diver, 470, 5); 
+  image(finish2, 830, 335);
+}
+  if (currentScene == 2 && selectedCharacter == 3) {
+  image(finish3, 900, 110); 
+}
   fill(#3E0B0C);
   textSize(22); 
   textAlign(LEFT, TOP);
@@ -282,7 +317,7 @@ void displayGameScene() {
   if (characterX + characterWidth >= width) {
     currentScene++;
     if (currentScene >= backgrounds[characterIndex].length) {
-      currentScene = backgrounds[characterIndex].length; // Ensure it doesn't go out of bounds
+      currentScene = backgrounds[characterIndex].length; 
     }
     characterX = 0;
   }
@@ -337,7 +372,7 @@ void checkPlatformCollision() {
   }
 }
 
-
+//can sayısı 0 olduğunda Game Over yazısının görünmesi
 void checkGameOver() {
   if (livesRemaining <= 0) {
     fill(255, 0, 0);
@@ -359,12 +394,120 @@ void checkGameOverZoneCollision() {
         characterY + characterHeight > zone[1] && characterY < zone[1] + zone[3]) {
       reduceLife();
       if (livesRemaining > 0) {
-        characterX = characterX - 70;
+        characterX = characterX - 70; // Can azaldığında karakterin pozisyonunu geriye al
       }
+    }
+  }
+
+  // Karakter 2 nin crab ve jellyfish ile teması
+  if (currentScene == 0 && selectedCharacter == 2) {
+    // crab ile temas kontrolü
+    if (characterX + characterWidth > crabX && characterX < crabX + crab.width &&
+        characterY + characterHeight > crabY && characterY < crabY + crab.height) {
+      reduceLife();
+    }
+    // jellyfish ile temas kontrolü
+    if (characterX + characterWidth > jellyfishX && characterX < jellyfishX + jellyfish.width &&
+        characterY + characterHeight > jellyfishY && characterY < jellyfishY + jellyfish.height) {
+      reduceLife();
     }
   }
 }
 
+// karakter 1 in ejderha ile teması
+void displayDragon() {
+  // Karakterle çarpışma kontrolü
+  if (currentScene == 1 && selectedCharacter == 1) { 
+    image(dragon, dragonX, dragonY); // Dragon nesnesini ekrana göster
+  }
+}
+
+void moveDragon() {
+  // Karakterle çarpışma kontrolü
+  if (currentScene == 1 && selectedCharacter == 1) { 
+    // Dragon'un hareketini güncelle
+    dragonX += dragonSpeed;
+
+    // Dragon ekranın sağ veya sol kenarına ulaştığında yönünü değiştir
+    if (dragonX <= 0 || dragonX + dragon.width >= width) {
+      dragonSpeed *= -1;
+    }
+
+    // Karakterle çarpışma kontrolü
+    if (characterX < dragonX + dragon.width && 
+        characterX + characterWidth > dragonX && 
+        characterY < dragonY + dragon.height && 
+        characterY + characterHeight > dragonY) {
+      // Karakterle çarpışma olduğunda can sayısını azalt
+      reduceLife();
+      // Karakterin ölmemesi için karakterin pozisyonunu sıfırla veya başka bir işlem yap
+      resetCharacterPosition();
+    }
+  }
+}
+
+void moveCrab() {
+  // Crab'ın hareketini güncelle
+  crabY += crabSpeed;
+
+  // Yörüngenin üst veya alt sınırına ulaşıldığında, hareketi tersine çevir
+  if (crabY <= 150 || crabY + crab.width >= width) {
+    crabSpeed *= -1;
+  }
+}
+
+void moveJellyfish() {
+  // Jellyfish'in hareketini güncelle
+  jellyfishY += jellyfishSpeed;
+
+  // Yörüngenin alt sınırına veya üst sınırına ulaşıldığında, hızı tersine çevir
+  if (jellyfishY <= 150 || jellyfishY + jellyfish.width >= width) {
+    jellyfishSpeed *= -1;
+  }
+}
+
+void displayCrabAndJellyfish() {
+  // Sadece hareketli olan crab ve jellyfish'i görüntüle
+  if (currentScene == 0 && selectedCharacter == 2) {
+    // crab resmini çiz
+    image(crab, crabX, crabY);
+    // jellyfish resmini çiz
+    image(jellyfish, jellyfishX, jellyfishY);
+  }
+}
+
+//köpekbalığı kontrolü
+
+void moveSharks() {
+  if (currentScene == 2 && selectedCharacter == 2) { 
+    sharkX1 -= sharkSpeed; 
+
+    // Sahnenin sınırlarına ulaştığında geri dön
+    if (sharkX1 <= 0 || sharkX1 + shark.width >= width) {
+      sharkSpeed *= -1; 
+    }
+
+    // Karakterle çarpışma kontrolü
+    if (characterX < sharkX1 + shark.width && 
+        characterX + characterWidth > sharkX1 && 
+        characterY < sharkY1 + shark.height && 
+        characterY + characterHeight > sharkY1) {
+      // Karakterle çarpışma olduğunda can sayısını azalt
+      reduceLife();
+      // Karakterin ölmemesi için karakterin pozisyonunu sıfırla veya başka bir işlem yap
+      resetCharacterPosition();
+    }
+  }
+}
+
+void displaySharks() {
+  if (currentScene == 2 && selectedCharacter == 2) {
+    // İlk köpek balığı resmini çiz
+    image(shark, sharkX1, sharkY1);
+  }
+}
+
+//hareket fonksiyonlarının ve diğer eylemlerin tanımlandığı draw fonksiyonu
 
 void draw() {
   if (!gameStarted) {
@@ -382,10 +525,19 @@ void draw() {
       checkPlatformCollision();
       checkGameOverZoneCollision(); 
       displayLives();
-      checkGameOver(); // Can sayısını kontrol et
+      checkGameOver(); 
+      displayDragon();
+      moveDragon();
+      moveCrab(); // Crab hareket
+      moveJellyfish(); // Jellyfish hareket 
+      displayCrabAndJellyfish();
+      moveSharks(); // Köpek balığı hareket 
+      displaySharks();
     }
   }
 }
+
+//oyun içindeki eylemleri şekillendiren mouse işlemleri
 
 void mousePressed() {
   println("Mouse tıklandı: (" + mouseX + ", " + mouseY + ")");
@@ -408,7 +560,7 @@ void mousePressed() {
     if (currentScene >= backgrounds[selectedCharacter - 1].length) {
       // EndScene'de tıklama işlemi
       if (mouseX > 370 && mouseX < 610 && mouseY > 320 && mouseY < 370) {
-        currentScene = 0; // Wall0 sahnesine dön
+        currentScene = 0; 
         resetCharacterPosition(); // Karakterin pozisyonunu sıfırla
         loop(); // Loop'u tekrar başlat
       }
@@ -416,6 +568,7 @@ void mousePressed() {
   }
 }
 
+//yerçekimi(gravity) ve hız(velocity) kontrolü
 void applyGravity() {
   if (!onGround) {
     velocityY += gravity;
@@ -423,6 +576,7 @@ void applyGravity() {
   characterY += velocityY;
 }
 
+//zemin sınırı kontrolü
 void checkGround() {
   if (characterY + characterHeight >= height) {
     characterY = height - characterHeight;
@@ -441,6 +595,7 @@ void updateCharacterPosition() {
   }
 }
 
+//key hareketleri
 void handleMovement() {
   if (keyPressed) {
     if (key == CODED) {
@@ -467,15 +622,15 @@ void keyReleased() {
   }
 }
 
+//can sayısı azalması işlemi
 void reduceLife() {
   livesRemaining--;
   if (livesRemaining < 0) {
     livesRemaining = 0;
-  } else {
-    //resetCharacterPosition();
   }
 }
 
+//sahne içindeki platformlar için tanımlanan class
 class Platform {
   float x, y, width, height;
 
@@ -487,6 +642,7 @@ class Platform {
   }
 }
 
+//can sayısı için tanımlanan class
 class Live {
   float x, y;
   boolean collected;
